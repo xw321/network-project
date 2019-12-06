@@ -1,9 +1,13 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Graph {
   // mapping of vertex names to Vertex objects, built from a set of Edges
   private final Map<String, Vertex> graph;
+  static int count = 0;
+
 
   /**
    * One edge of the graph (only used by Graph constructor)
@@ -23,6 +27,8 @@ public class Graph {
    * One vertex of the graph, complete with mappings to neighbouring vertices
    */
   public static class Vertex implements Comparable<Vertex> {
+    public  static  List<String> vertices = new ArrayList<>();
+    public  static  List<String> edges = new ArrayList<>();
     public final String name;
     public int dist = Integer.MAX_VALUE;
     public Vertex previous = null;
@@ -32,14 +38,54 @@ public class Graph {
       this.name = name;
     }
 
-    private void printPath() {
+    public void printPath(int flag) {
+      if(flag == 1 && vertices.size()!=0) {
+        viz(vertices,edges,flag,"Simple Dijkstra");
+        vertices.clear();
+        edges.clear();
+        flag = 0;
+      }
+      if(flag == 0 && vertices.size()!=0) {
+        System.out.println();
+        viz(vertices,edges,1,"Must not pass Dijkstra");
+        vertices.clear();
+        edges.clear();
+        flag = 0;
+      }
       if (this == this.previous) {
-        System.out.printf("%s", this.name);
+        if(count != 2) {
+          System.out.printf("%s", this.name);
+        }
+        vertices.add(this.name);
       } else if (this.previous == null) {
         System.out.printf("%s(unreached)", this.name);
       } else {
-        this.previous.printPath();
-        System.out.printf(" -> %s(%d)", this.name, this.dist);
+        this.previous.printPath(flag);
+        if(count != 2) {
+          System.out.printf(" -> %s(%d)", this.name, this.dist);
+        }
+        vertices.add(this.name);
+        edges.add(String.valueOf(this.dist));
+      }
+    }
+    /*
+    Creates a list of vertices and edges for visualizing the graph.
+     */
+    public void viz(List<String> vertices,List<String> edges,int flag,String Title) {
+      if(flag == 1) {
+        List<String> ver = new ArrayList<>();
+        List<String> edges1 = new ArrayList<>();
+        int j = 0;
+        for(int i = 0 ; i < vertices.size()-1;i++) {
+          edges1.add(vertices.get(i));
+          edges1.add(vertices.get(i+1));
+          edges1.add(edges.get(j));
+          j++;
+        }
+        for(String a:vertices) {
+          ver.add(a);
+        }
+        GraphViz.start(ver,edges1,Title);
       }
     }
 
@@ -100,17 +146,26 @@ public class Graph {
       System.err.printf("Graph doesn't contain end vertex \"%s\"\n", endName);
       return;
     }
-
-    graph.get(endName).printPath();
+    if(count == 0) {
+      graph.get(endName).printPath(0);
+      count++;
+    }
+    else {
+      graph.get(endName).printPath(1);
+      count++;
+      graph.get(endName).printPath(0);
+    }
     System.out.println();
+
   }
 
   /**
    * Prints the path from the source to every vertex (output order is not guaranteed)
    */
   public void printAllPaths() {
+    int flag = 1;
     for (Vertex v : graph.values()) {
-      v.printPath();
+      v.printPath(flag);
       System.out.println();
     }
   }
