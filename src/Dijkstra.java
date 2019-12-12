@@ -20,7 +20,17 @@ public class Dijkstra {
       System.err.printf("Graph doesn't contain start vertex \"%s\"\n", src);
       return;
     }
-    dijkstraSetup(graph, src);
+    final Graph.Vertex source = graph.get(src);
+    NavigableSet<Graph.Vertex> q = new TreeSet<>();
+
+    // set-up vertices
+    for (Graph.Vertex v : graph.values()) {
+      v.previous = v == source ? source : null;
+      v.dist = v == source ? 0 : Integer.MAX_VALUE;
+      q.add(v);
+    }
+
+    dijkstra(q);
     g.printPath(dest);
   }
 
@@ -89,7 +99,9 @@ public class Dijkstra {
       }
     }
 
+
     Graph newGraph = new Graph(graph);
+
     dijkstra(newGraph, src, dest);
   }
 
